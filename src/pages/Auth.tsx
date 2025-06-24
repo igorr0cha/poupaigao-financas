@@ -55,11 +55,16 @@ const Auth = () => {
     }
   };
 
+  const backgroundPattern = "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-green-950 to-slate-900 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.02"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
+      <div 
+        className="absolute inset-0 opacity-20"
+        style={{ backgroundImage: `url("${backgroundPattern}")` }}
+      ></div>
       
-      <Card className="w-full max-w-md backdrop-blur-sm bg-black/40 border-green-800/30 shadow-2xl">
+      <Card className="w-full max-w-md backdrop-blur-sm bg-black/40 border-green-800/30 shadow-2xl relative z-10">
         <CardHeader className="space-y-1 text-center">
           <div className="mx-auto w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
             <Wallet className="w-8 h-8 text-white" />
