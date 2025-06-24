@@ -70,9 +70,16 @@ export const useFinancialData = () => {
       if (goalsData.error) throw goalsData.error;
       if (categoriesData.error) throw categoriesData.error;
 
+      // Type assertion to ensure correct typing
       setAccounts(accountsData.data || []);
-      setTransactions(transactionsData.data || []);
-      setGoals(goalsData.data || []);
+      setTransactions((transactionsData.data || []).map(t => ({
+        ...t,
+        type: t.type as 'income' | 'expense'
+      })));
+      setGoals((goalsData.data || []).map(g => ({
+        ...g,
+        priority: g.priority as 'high' | 'medium' | 'low'
+      })));
       setCategories(categoriesData.data || []);
     } catch (error) {
       console.error('Error fetching financial data:', error);
