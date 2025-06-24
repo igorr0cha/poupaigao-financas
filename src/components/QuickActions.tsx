@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus, Transfer, Target, CreditCard, PieChart } from "lucide-react";
+import { Plus, Minus, ArrowLeftRight, Target, CreditCard, PieChart } from "lucide-react";
 
 export const QuickActions = () => {
   const actions = [
@@ -22,7 +22,7 @@ export const QuickActions = () => {
     {
       title: "Transferência",
       description: "Entre contas próprias",
-      icon: Transfer,
+      icon: ArrowLeftRight,
       color: "bg-blue-500 hover:bg-blue-600",
       action: () => console.log("Transfer")
     },
