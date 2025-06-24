@@ -36,8 +36,16 @@ export const FinancialChart = ({ income, expenses }: FinancialChartProps) => {
               `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
               ''
             ]}
+            contentStyle={{
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              borderRadius: '8px',
+              color: 'white'
+            }}
           />
-          <Legend />
+          <Legend 
+            wrapperStyle={{ color: 'white' }}
+          />
         </PieChart>
       </ResponsiveContainer>
     </div>

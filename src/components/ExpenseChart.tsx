@@ -1,8 +1,17 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-export const ExpenseChart = () => {
-  const data = [
+interface ExpenseChartProps {
+  data?: Array<{
+    name: string;
+    value: number;
+    color: string;
+  }>;
+}
+
+export const ExpenseChart = ({ data }: ExpenseChartProps) => {
+  // Use dados reais ou dados de exemplo se não houver dados
+  const chartData = data && data.length > 0 ? data : [
     { name: 'Moradia', value: 1200, color: '#3B82F6' },
     { name: 'Alimentação', value: 800, color: '#10B981' },
     { name: 'Transporte', value: 450, color: '#F59E0B' },
@@ -11,14 +20,14 @@ export const ExpenseChart = () => {
     { name: 'Outros', value: 200.50, color: '#6B7280' },
   ];
 
-  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#6B7280'];
+  const COLORS = chartData.map(item => item.color);
 
   return (
     <div className="h-64">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
-            data={data}
+            data={chartData}
             cx="50%"
             cy="50%"
             innerRadius={40}
@@ -26,7 +35,7 @@ export const ExpenseChart = () => {
             paddingAngle={2}
             dataKey="value"
           >
-            {data.map((entry, index) => (
+            {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
@@ -35,8 +44,16 @@ export const ExpenseChart = () => {
               `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
               ''
             ]}
+            contentStyle={{
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              borderRadius: '8px',
+              color: 'white'
+            }}
           />
-          <Legend />
+          <Legend 
+            wrapperStyle={{ color: 'white' }}
+          />
         </PieChart>
       </ResponsiveContainer>
     </div>

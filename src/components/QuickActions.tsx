@@ -50,9 +50,9 @@ export const QuickActions = () => {
   ];
 
   return (
-    <Card>
+    <Card className="bg-transparent border-none shadow-none">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-gray-900">
+        <CardTitle className="text-lg font-semibold text-white">
           Ações Rápidas
         </CardTitle>
       </CardHeader>
@@ -62,15 +62,15 @@ export const QuickActions = () => {
             <Button
               key={index}
               variant="outline"
-              className="h-auto p-4 flex flex-col items-center space-y-2 hover:shadow-md transition-all"
+              className="h-auto p-4 flex flex-col items-center space-y-2 hover:shadow-md transition-all border-green-800/30 text-gray-300 hover:text-white hover:bg-white/10 bg-gray-900/30"
               onClick={action.action}
             >
-              <div className={`w-10 h-10 ${action.color} rounded-full flex items-center justify-center`}>
+              <div className={`w-10 h-10 ${action.color} rounded-full flex items-center justify-center transition-transform hover:scale-110`}>
                 <action.icon className="w-5 h-5 text-white" />
               </div>
               <div className="text-center">
                 <div className="font-medium text-sm">{action.title}</div>
-                <div className="text-xs text-gray-500">{action.description}</div>
+                <div className="text-xs text-gray-400">{action.description}</div>
               </div>
             </Button>
           ))}
