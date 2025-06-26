@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useFinancialData } from '@/hooks/useFinancialData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, ArrowUpRight, ArrowDownRight, Calendar } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
@@ -23,7 +25,15 @@ const Transactions = () => {
     description: '',
     date: new Date().toISOString().split('T')[0],
     account_id: '',
-    category_id: ''
+    category_id: '',
+    competence_month: new Date().getMonth() + 1,
+    competence_year: new Date().getFullYear(),
+    due_date: '',
+    is_recurring: false,
+    recurring_day: new Date().getDate(),
+    is_bill: false,
+    bill_closing_date: '',
+    bill_due_date: ''
   });
   const [saving, setSaving] = useState(false);
 
@@ -32,14 +42,40 @@ const Transactions = () => {
     setSaving(true);
 
     try {
-      const { error } = await addTransaction({
+      const transactionData: any = {
         type: formData.type,
         amount: parseFloat(formData.amount),
         description: formData.description,
         date: formData.date,
         account_id: formData.account_id,
-        category_id: formData.type === 'expense' ? formData.category_id : undefined
-      });
+        competence_month: formData.competence_month,
+        competence_year: formData.competence_year
+      };
+
+      if (formData.type === 'expense') {
+        transactionData.category_id = formData.category_id;
+        
+        if (formData.due_date) {
+          transactionData.due_date = formData.due_date;
+        }
+        
+        if (formData.is_recurring) {
+          transactionData.is_recurring = true;
+          transactionData.recurring_day = formData.recurring_day;
+        }
+        
+        if (formData.is_bill) {
+          transactionData.is_bill = true;
+          if (formData.bill_closing_date) {
+            transactionData.bill_closing_date = formData.bill_closing_date;
+          }
+          if (formData.bill_due_date) {
+            transactionData.bill_due_date = formData.bill_due_date;
+          }
+        }
+      }
+
+      const { error } = await addTransaction(transactionData);
 
       if (error) throw error;
 
@@ -55,7 +91,15 @@ const Transactions = () => {
         description: '',
         date: formData.date,
         account_id: formData.account_id,
-        category_id: ''
+        category_id: '',
+        competence_month: formData.competence_month,
+        competence_year: formData.competence_year,
+        due_date: '',
+        is_recurring: false,
+        recurring_day: new Date().getDate(),
+        is_bill: false,
+        bill_closing_date: '',
+        bill_due_date: ''
       });
     } catch (error: any) {
       toast({
@@ -78,6 +122,11 @@ const Transactions = () => {
 
   const backgroundSvg = `data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.02"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E`;
 
+  const months = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-green-950 to-slate-900">
       <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `url("${backgroundSvg}")` }}></div>
@@ -89,7 +138,7 @@ const Transactions = () => {
               <Plus className="mr-3 h-8 w-8 text-green-400" />
               Nova Transação
             </h1>
-            <p className="text-gray-400 mt-2">Registre suas receitas e despesas</p>
+            <p className="text-gray-400 mt-2">Registre suas receitas e despesas com detalhes avançados</p>
           </div>
 
           <Card className="backdrop-blur-sm bg-black/40 border-green-800/30">
@@ -129,7 +178,7 @@ const Transactions = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="amount" className="text-gray-300">Valor</Label>
+                    <Label htmlFor="amount" className="text-gray-300">Valor *</Label>
                     <Input
                       id="amount"
                       type="number"
@@ -145,7 +194,7 @@ const Transactions = () => {
                   <div className="space-y-2">
                     <Label htmlFor="date" className="text-gray-300">
                       <Calendar className="inline mr-2 h-4 w-4" />
-                      Data
+                      Data *
                     </Label>
                     <Input
                       id="date"
@@ -158,8 +207,44 @@ const Transactions = () => {
                   </div>
                 </div>
 
+                {/* Competência */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="competence-month" className="text-gray-300">Mês de Competência *</Label>
+                    <Select
+                      value={formData.competence_month.toString()}
+                      onValueChange={(value) => setFormData({...formData, competence_month: parseInt(value)})}
+                    >
+                      <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-800 border-gray-700">
+                        {months.map((month, index) => (
+                          <SelectItem key={index + 1} value={(index + 1).toString()} className="text-white">
+                            {month}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="competence-year" className="text-gray-300">Ano de Competência *</Label>
+                    <Input
+                      id="competence-year"
+                      type="number"
+                      value={formData.competence_year}
+                      onChange={(e) => setFormData({...formData, competence_year: parseInt(e.target.value)})}
+                      className="bg-gray-800 border-gray-700 text-white"
+                      min="2020"
+                      max="2030"
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-gray-300">Descrição</Label>
+                  <Label htmlFor="description" className="text-gray-300">Descrição *</Label>
                   <Textarea
                     id="description"
                     placeholder="Descreva a transação..."
@@ -171,7 +256,7 @@ const Transactions = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="account" className="text-gray-300">Conta</Label>
+                  <Label htmlFor="account" className="text-gray-300">Conta *</Label>
                   <Select
                     value={formData.account_id}
                     onValueChange={(value) => setFormData({...formData, account_id: value})}
@@ -191,31 +276,102 @@ const Transactions = () => {
                 </div>
 
                 {formData.type === 'expense' && (
-                  <div className="space-y-2">
-                    <Label htmlFor="category" className="text-gray-300">Categoria</Label>
-                    <Select
-                      value={formData.category_id}
-                      onValueChange={(value) => setFormData({...formData, category_id: value})}
-                      required={formData.type === 'expense'}
-                    >
-                      <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                        <SelectValue placeholder="Selecione a categoria" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-gray-800 border-gray-700">
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id} className="text-white">
-                            <div className="flex items-center">
-                              <div 
-                                className="w-3 h-3 rounded-full mr-2" 
-                                style={{ backgroundColor: category.color }}
-                              ></div>
-                              {category.name}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="category" className="text-gray-300">Categoria *</Label>
+                      <Select
+                        value={formData.category_id}
+                        onValueChange={(value) => setFormData({...formData, category_id: value})}
+                        required
+                      >
+                        <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                          <SelectValue placeholder="Selecione a categoria" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-800 border-gray-700">
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id} className="text-white">
+                              <div className="flex items-center">
+                                <div 
+                                  className="w-3 h-3 rounded-full mr-2" 
+                                  style={{ backgroundColor: category.color }}
+                                ></div>
+                                {category.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="due-date" className="text-gray-300">Data de Vencimento (opcional)</Label>
+                      <Input
+                        id="due-date"
+                        type="date"
+                        value={formData.due_date}
+                        onChange={(e) => setFormData({...formData, due_date: e.target.value})}
+                        className="bg-gray-800 border-gray-700 text-white"
+                      />
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="recurring"
+                        checked={formData.is_recurring}
+                        onCheckedChange={(checked) => setFormData({...formData, is_recurring: !!checked})}
+                      />
+                      <Label htmlFor="recurring" className="text-gray-300">Despesa recorrente</Label>
+                    </div>
+
+                    {formData.is_recurring && (
+                      <div className="space-y-2">
+                        <Label htmlFor="recurring-day" className="text-gray-300">Dia do mês para recorrência</Label>
+                        <Input
+                          id="recurring-day"
+                          type="number"
+                          value={formData.recurring_day}
+                          onChange={(e) => setFormData({...formData, recurring_day: parseInt(e.target.value)})}
+                          className="bg-gray-800 border-gray-700 text-white"
+                          min="1"
+                          max="31"
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="is-bill"
+                        checked={formData.is_bill}
+                        onCheckedChange={(checked) => setFormData({...formData, is_bill: !!checked})}
+                      />
+                      <Label htmlFor="is-bill" className="text-gray-300">É uma fatura (ex: cartão de crédito)</Label>
+                    </div>
+
+                    {formData.is_bill && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="bill-closing" className="text-gray-300">Data de Fechamento</Label>
+                          <Input
+                            id="bill-closing"
+                            type="date"
+                            value={formData.bill_closing_date}
+                            onChange={(e) => setFormData({...formData, bill_closing_date: e.target.value})}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="bill-due" className="text-gray-300">Data de Vencimento da Fatura</Label>
+                          <Input
+                            id="bill-due"
+                            type="date"
+                            value={formData.bill_due_date}
+                            onChange={(e) => setFormData({...formData, bill_due_date: e.target.value})}
+                            className="bg-gray-800 border-gray-700 text-white"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 <Button

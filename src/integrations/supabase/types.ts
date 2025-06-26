@@ -9,6 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      account_balance_adjustments: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          new_balance: number
+          old_balance: number
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          new_balance: number
+          old_balance: number
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          new_balance?: number
+          old_balance?: number
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_balance_adjustments_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounts: {
         Row: {
           balance: number
@@ -88,6 +126,7 @@ export type Database = {
           color: string
           created_at: string
           id: string
+          is_user_created: boolean | null
           name: string
           user_id: string
         }
@@ -95,6 +134,7 @@ export type Database = {
           color?: string
           created_at?: string
           id?: string
+          is_user_created?: boolean | null
           name: string
           user_id: string
         }
@@ -102,6 +142,7 @@ export type Database = {
           color?: string
           created_at?: string
           id?: string
+          is_user_created?: boolean | null
           name?: string
           user_id?: string
         }
@@ -230,33 +271,60 @@ export type Database = {
         Row: {
           account_id: string
           amount: number
+          bill_closing_date: string | null
+          bill_due_date: string | null
           category_id: string | null
+          competence_month: number
+          competence_year: number
           created_at: string
           date: string
           description: string
+          due_date: string | null
           id: string
+          is_bill: boolean | null
+          is_paid: boolean | null
+          is_recurring: boolean | null
+          recurring_day: number | null
           type: string
           user_id: string
         }
         Insert: {
           account_id: string
           amount: number
+          bill_closing_date?: string | null
+          bill_due_date?: string | null
           category_id?: string | null
+          competence_month: number
+          competence_year: number
           created_at?: string
           date?: string
           description: string
+          due_date?: string | null
           id?: string
+          is_bill?: boolean | null
+          is_paid?: boolean | null
+          is_recurring?: boolean | null
+          recurring_day?: number | null
           type: string
           user_id: string
         }
         Update: {
           account_id?: string
           amount?: number
+          bill_closing_date?: string | null
+          bill_due_date?: string | null
           category_id?: string | null
+          competence_month?: number
+          competence_year?: number
           created_at?: string
           date?: string
           description?: string
+          due_date?: string | null
           id?: string
+          is_bill?: boolean | null
+          is_paid?: boolean | null
+          is_recurring?: boolean | null
+          recurring_day?: number | null
           type?: string
           user_id?: string
         }

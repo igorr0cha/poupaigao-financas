@@ -35,6 +35,7 @@ function App() {
                       <Route path="/metas" element={<Goals />} />
                       <Route path="/investimentos" element={<Investments />} />
                       <Route path="/transacao" element={<Transactions />} />
+                      <Route path="/despesas" element={<Expenses />} />
                       <Route path="/relatorios" element={<Reports />} />
                       <Route path="/historico" element={<MonthlyHistory />} />
                       <Route path="*" element={<NotFound />} />
