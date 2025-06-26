@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -166,8 +167,12 @@ export const useFinancialData = () => {
     return investments.reduce((sum, investment) => sum + Number(investment.total_invested), 0);
   };
 
+  const getTotalGoals = () => {
+    return goals.reduce((sum, goal) => sum + Number(goal.current_amount), 0);
+  };
+
   const getNetWorth = () => {
-    return getTotalBalance() + getTotalInvestments();
+    return getTotalBalance() + getTotalInvestments() + getTotalGoals();
   };
 
   const getMonthlyIncome = (month?: number, year?: number) => {
@@ -176,10 +181,10 @@ export const useFinancialData = () => {
     
     return transactions
       .filter(t => {
-        const transactionDate = new Date(t.date);
         return t.type === 'income' && 
-               transactionDate.getMonth() === targetMonth && 
-               transactionDate.getFullYear() === targetYear;
+               t.competence_month === (targetMonth + 1) && 
+               t.competence_year === targetYear &&
+               t.is_paid;
       })
       .reduce((sum, t) => sum + Number(t.amount), 0);
   };
@@ -190,10 +195,24 @@ export const useFinancialData = () => {
     
     return transactions
       .filter(t => {
-        const transactionDate = new Date(t.date);
         return t.type === 'expense' && 
-               transactionDate.getMonth() === targetMonth && 
-               transactionDate.getFullYear() === targetYear;
+               t.competence_month === (targetMonth + 1) && 
+               t.competence_year === targetYear &&
+               t.is_paid;
+      })
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+  };
+
+  const getUnpaidExpenses = (month?: number, year?: number) => {
+    const targetMonth = month ?? new Date().getMonth();
+    const targetYear = year ?? new Date().getFullYear();
+    
+    return transactions
+      .filter(t => {
+        return t.type === 'expense' && 
+               t.competence_month === (targetMonth + 1) && 
+               t.competence_year === targetYear &&
+               !t.is_paid;
       })
       .reduce((sum, t) => sum + Number(t.amount), 0);
   };
@@ -202,15 +221,21 @@ export const useFinancialData = () => {
     return getMonthlyIncome(month, year) - getMonthlyExpenses(month, year);
   };
 
+  const getProjectedBalance = (month?: number, year?: number) => {
+    const currentBalance = getMonthlyBalance(month, year);
+    const unpaidExpenses = getUnpaidExpenses(month, year);
+    return currentBalance - unpaidExpenses;
+  };
+
   const getExpensesByCategory = (month?: number, year?: number) => {
     const targetMonth = month ?? new Date().getMonth();
     const targetYear = year ?? new Date().getFullYear();
     
     const monthlyExpenses = transactions.filter(t => {
-      const transactionDate = new Date(t.date);
       return t.type === 'expense' && 
-             transactionDate.getMonth() === targetMonth && 
-             transactionDate.getFullYear() === targetYear;
+             t.competence_month === (targetMonth + 1) && 
+             t.competence_year === targetYear &&
+             t.is_paid;
     });
 
     const categoryTotals = categories.map(category => {
@@ -268,8 +293,7 @@ export const useFinancialData = () => {
     if (!user) return { error: 'No user logged in' };
 
     try {
-      // Set competence month and year based on the transaction date
-      const transactionDate = new Date(transaction.date);
+      const transactionDate = new Date();
       const competenceMonth = transaction.competence_month || transactionDate.getMonth() + 1;
       const competenceYear = transaction.competence_year || transactionDate.getFullYear();
 
@@ -283,6 +307,54 @@ export const useFinancialData = () => {
         });
 
       if (error) throw error;
+      await fetchAllData();
+      return { error: null };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const markTransactionAsPaid = async (transactionId: string, accountId: string) => {
+    if (!user) return { error: 'No user logged in' };
+
+    try {
+      // Get transaction details
+      const { data: transaction, error: fetchError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('id', transactionId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Update transaction as paid
+      const { error: updateError } = await supabase
+        .from('transactions')
+        .update({ is_paid: true })
+        .eq('id', transactionId);
+
+      if (updateError) throw updateError;
+
+      // Update account balance (debit for expenses)
+      if (transaction.type === 'expense') {
+        const { data: account, error: accountError } = await supabase
+          .from('accounts')
+          .select('balance')
+          .eq('id', accountId)
+          .single();
+
+        if (accountError) throw accountError;
+
+        const newBalance = Number(account.balance) - Number(transaction.amount);
+
+        const { error: balanceError } = await supabase
+          .from('accounts')
+          .update({ balance: newBalance })
+          .eq('id', accountId);
+
+        if (balanceError) throw balanceError;
+      }
+
       await fetchAllData();
       return { error: null };
     } catch (error) {
@@ -318,14 +390,18 @@ export const useFinancialData = () => {
     loading,
     getTotalBalance,
     getTotalInvestments,
+    getTotalGoals,
     getNetWorth,
     getMonthlyIncome,
     getMonthlyExpenses,
+    getUnpaidExpenses,
     getMonthlyBalance,
+    getProjectedBalance,
     getExpensesByCategory,
     getMonthlyData,
     getInvestmentsByType,
     addTransaction,
+    markTransactionAsPaid,
     addInvestment,
     refetch: fetchAllData
   };

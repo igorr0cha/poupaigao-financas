@@ -15,10 +15,13 @@ const Index = () => {
   const { 
     getTotalBalance, 
     getTotalInvestments,
+    getTotalGoals,
     getNetWorth,
     getMonthlyIncome, 
     getMonthlyExpenses, 
     getMonthlyBalance,
+    getUnpaidExpenses,
+    getProjectedBalance,
     getExpensesByCategory,
     goals,
     loading 
@@ -34,10 +37,13 @@ const Index = () => {
 
   const totalBalance = getTotalBalance();
   const totalInvestments = getTotalInvestments();
+  const totalGoals = getTotalGoals();
   const netWorth = getNetWorth();
   const monthlyIncome = getMonthlyIncome();
   const monthlyExpenses = getMonthlyExpenses();
   const monthlyBalance = getMonthlyBalance();
+  const unpaidExpenses = getUnpaidExpenses();
+  const projectedBalance = getProjectedBalance();
   const expensesByCategory = getExpensesByCategory();
 
   const getUserDisplayName = () => {
@@ -89,7 +95,7 @@ const Index = () => {
                 R$ <AnimatedCounter value={netWorth} />
               </div>
               <p className="text-xs text-gray-400 mt-1">
-                Contas + Investimentos
+                Contas + Investimentos + Metas
               </p>
             </CardContent>
           </Card>
@@ -133,9 +139,22 @@ const Index = () => {
               <div className={`text-2xl font-bold ${monthlyBalance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                 R$ <AnimatedCounter value={monthlyBalance} />
               </div>
-              <p className="text-xs text-gray-400 mt-1">
-                Receitas - Despesas
-              </p>
+              <div className="mt-2 space-y-1">
+                <p className="text-xs text-gray-400">
+                  Receitas - Despesas pagas
+                </p>
+                {unpaidExpenses > 0 && (
+                  <div className="text-xs">
+                    <span className="text-orange-400">
+                      Pendente: R$ {unpaidExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                    <br />
+                    <span className={`font-semibold ${projectedBalance >= 0 ? 'text-blue-300' : 'text-red-300'}`}>
+                      Projeção: R$ {projectedBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -205,19 +224,28 @@ const Index = () => {
             <CardHeader>
               <CardTitle className="text-white flex items-center">
                 <TrendingUp className="mr-2 h-5 w-5 text-blue-400" />
-                Total Investido
+                Resumo Financeiro
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-400 mb-2">
-                  R$ <AnimatedCounter value={totalInvestments} />
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-blue-500/10 rounded-lg">
+                  <span className="text-blue-300">Total Investido</span>
+                  <span className="text-blue-400 font-bold">
+                    R$ <AnimatedCounter value={totalInvestments} />
+                  </span>
                 </div>
-                <p className="text-gray-400">Valor total dos seus investimentos</p>
-                <div className="mt-4 p-3 bg-blue-500/10 rounded-lg">
-                  <p className="text-sm text-blue-300">
-                    {((totalInvestments / (totalBalance || 1)) * 100).toFixed(1)}% do seu patrimônio
-                  </p>
+                <div className="flex justify-between items-center p-3 bg-purple-500/10 rounded-lg">
+                  <span className="text-purple-300">Total em Metas</span>
+                  <span className="text-purple-400 font-bold">
+                    R$ <AnimatedCounter value={totalGoals} />
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-green-500/10 rounded-lg">
+                  <span className="text-green-300">Saldo em Contas</span>
+                  <span className="text-green-400 font-bold">
+                    R$ <AnimatedCounter value={totalBalance} />
+                  </span>
                 </div>
               </div>
             </CardContent>

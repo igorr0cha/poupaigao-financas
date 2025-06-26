@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useFinancialData } from '@/hooks/useFinancialData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,17 +22,13 @@ const Transactions = () => {
     type: 'expense' as 'income' | 'expense',
     amount: '',
     description: '',
-    date: new Date().toISOString().split('T')[0],
     account_id: '',
     category_id: '',
     competence_month: new Date().getMonth() + 1,
     competence_year: new Date().getFullYear(),
     due_date: '',
     is_recurring: false,
-    recurring_day: new Date().getDate(),
-    is_bill: false,
-    bill_closing_date: '',
-    bill_due_date: ''
+    recurring_day: new Date().getDate()
   });
   const [saving, setSaving] = useState(false);
 
@@ -46,10 +41,11 @@ const Transactions = () => {
         type: formData.type,
         amount: parseFloat(formData.amount),
         description: formData.description,
-        date: formData.date,
         account_id: formData.account_id,
         competence_month: formData.competence_month,
-        competence_year: formData.competence_year
+        competence_year: formData.competence_year,
+        date: new Date().toISOString().split('T')[0], // Data atual
+        is_paid: formData.type === 'income' // Receitas são pagas por padrão, despesas não
       };
 
       if (formData.type === 'expense') {
@@ -63,16 +59,6 @@ const Transactions = () => {
           transactionData.is_recurring = true;
           transactionData.recurring_day = formData.recurring_day;
         }
-        
-        if (formData.is_bill) {
-          transactionData.is_bill = true;
-          if (formData.bill_closing_date) {
-            transactionData.bill_closing_date = formData.bill_closing_date;
-          }
-          if (formData.bill_due_date) {
-            transactionData.bill_due_date = formData.bill_due_date;
-          }
-        }
       }
 
       const { error } = await addTransaction(transactionData);
@@ -84,22 +70,18 @@ const Transactions = () => {
         description: `${formData.type === 'income' ? 'Receita' : 'Despesa'} registrada com sucesso.`,
       });
 
-      // Reset form but keep date
+      // Reset form but keep some values
       setFormData({
-        type: 'expense',
+        type: formData.type,
         amount: '',
         description: '',
-        date: formData.date,
         account_id: formData.account_id,
         category_id: '',
         competence_month: formData.competence_month,
         competence_year: formData.competence_year,
         due_date: '',
         is_recurring: false,
-        recurring_day: new Date().getDate(),
-        is_bill: false,
-        bill_closing_date: '',
-        bill_due_date: ''
+        recurring_day: new Date().getDate()
       });
     } catch (error: any) {
       toast({
@@ -138,7 +120,7 @@ const Transactions = () => {
               <Plus className="mr-3 h-8 w-8 text-green-400" />
               Nova Transação
             </h1>
-            <p className="text-gray-400 mt-2">Registre suas receitas e despesas com detalhes avançados</p>
+            <p className="text-gray-400 mt-2">Registre suas receitas e despesas</p>
           </div>
 
           <Card className="backdrop-blur-sm bg-black/40 border-green-800/30">
@@ -176,41 +158,27 @@ const Transactions = () => {
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="amount" className="text-gray-300">Valor *</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={formData.amount}
-                      onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                      className="bg-gray-800 border-gray-700 text-white"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="date" className="text-gray-300">
-                      <Calendar className="inline mr-2 h-4 w-4" />
-                      Data *
-                    </Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData({...formData, date: e.target.value})}
-                      className="bg-gray-800 border-gray-700 text-white"
-                      required
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="amount" className="text-gray-300">Valor *</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={formData.amount}
+                    onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                    className="bg-gray-800 border-gray-700 text-white"
+                    required
+                  />
                 </div>
 
-                {/* Competência */}
+                {/* Competência - Sempre visível */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="competence-month" className="text-gray-300">Mês de Competência *</Label>
+                    <Label htmlFor="competence-month" className="text-gray-300">
+                      <Calendar className="inline mr-2 h-4 w-4" />
+                      Mês de Competência *
+                    </Label>
                     <Select
                       value={formData.competence_month.toString()}
                       onValueChange={(value) => setFormData({...formData, competence_month: parseInt(value)})}
@@ -320,7 +288,7 @@ const Transactions = () => {
                         checked={formData.is_recurring}
                         onCheckedChange={(checked) => setFormData({...formData, is_recurring: !!checked})}
                       />
-                      <Label htmlFor="recurring" className="text-gray-300">Despesa recorrente</Label>
+                      <Label htmlFor="recurring" className="text-gray-300">Despesa Recorrente</Label>
                     </div>
 
                     {formData.is_recurring && (
@@ -337,40 +305,6 @@ const Transactions = () => {
                         />
                       </div>
                     )}
-
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="is-bill"
-                        checked={formData.is_bill}
-                        onCheckedChange={(checked) => setFormData({...formData, is_bill: !!checked})}
-                      />
-                      <Label htmlFor="is-bill" className="text-gray-300">É uma fatura (ex: cartão de crédito)</Label>
-                    </div>
-
-                    {formData.is_bill && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="bill-closing" className="text-gray-300">Data de Fechamento</Label>
-                          <Input
-                            id="bill-closing"
-                            type="date"
-                            value={formData.bill_closing_date}
-                            onChange={(e) => setFormData({...formData, bill_closing_date: e.target.value})}
-                            className="bg-gray-800 border-gray-700 text-white"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="bill-due" className="text-gray-300">Data de Vencimento da Fatura</Label>
-                          <Input
-                            id="bill-due"
-                            type="date"
-                            value={formData.bill_due_date}
-                            onChange={(e) => setFormData({...formData, bill_due_date: e.target.value})}
-                            className="bg-gray-800 border-gray-700 text-white"
-                          />
-                        </div>
-                      </div>
-                    )}
                   </>
                 )}
 
@@ -379,7 +313,7 @@ const Transactions = () => {
                   disabled={saving}
                   className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
                 >
-                  {saving ? 'Salvando...' : 'Adicionar Transação'}
+                  {saving ? 'Salvando...' : `Adicionar ${formData.type === 'income' ? 'Receita' : 'Despesa'}`}
                 </Button>
               </form>
             </CardContent>
