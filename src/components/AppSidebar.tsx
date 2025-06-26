@@ -104,7 +104,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="bg-gradient-to-b from-green-900 via-green-800 to-green-900 border-r border-green-700/30">
+    <Sidebar className="[&>[data-sidebar=sidebar]]:bg-gradient-to-b [&>[data-sidebar=sidebar]]:from-green-900 [&>[data-sidebar=sidebar]]:via-green-800 [&>[data-sidebar=sidebar]]:to-green-900 border-r border-green-700/30">
       <SidebarHeader className="border-b border-green-700/30 p-6">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
