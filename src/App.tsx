@@ -11,6 +11,7 @@ import Accounts from '@/pages/Accounts';
 import Goals from '@/pages/Goals';
 import Investments from '@/pages/Investments';
 import Transactions from '@/pages/Transactions';
+import Expenses from '@/pages/Expenses';
 import Reports from '@/pages/Reports';
 import MonthlyHistory from '@/pages/MonthlyHistory';
 import NotFound from '@/pages/NotFound';

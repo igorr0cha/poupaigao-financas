@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +18,15 @@ interface Transaction {
   date: string;
   category_id?: string;
   account_id: string;
+  competence_month?: number;
+  competence_year?: number;
+  due_date?: string;
+  is_recurring?: boolean;
+  recurring_day?: number;
+  is_bill?: boolean;
+  bill_closing_date?: string;
+  bill_due_date?: string;
+  is_paid?: boolean;
 }
 
 interface Goal {
@@ -33,6 +41,7 @@ interface ExpenseCategory {
   id: string;
   name: string;
   color: string;
+  is_user_created?: boolean;
 }
 
 interface Investment {
@@ -259,9 +268,19 @@ export const useFinancialData = () => {
     if (!user) return { error: 'No user logged in' };
 
     try {
+      // Set competence month and year based on the transaction date
+      const transactionDate = new Date(transaction.date);
+      const competenceMonth = transaction.competence_month || transactionDate.getMonth() + 1;
+      const competenceYear = transaction.competence_year || transactionDate.getFullYear();
+
       const { error } = await supabase
         .from('transactions')
-        .insert({ ...transaction, user_id: user.id });
+        .insert({ 
+          ...transaction, 
+          user_id: user.id,
+          competence_month: competenceMonth,
+          competence_year: competenceYear
+        });
 
       if (error) throw error;
       await fetchAllData();

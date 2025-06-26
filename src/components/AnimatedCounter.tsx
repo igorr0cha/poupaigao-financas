@@ -57,3 +57,5 @@ export const AnimatedCounter = ({
     </span>
   );
 };
+
+export default AnimatedCounter;

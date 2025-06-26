@@ -8,7 +8,7 @@ import { FinancialChart } from '@/components/FinancialChart';
 import { ExpenseChart } from '@/components/ExpenseChart';
 import UpcomingBillsAdvanced from '@/components/UpcomingBillsAdvanced';
 import QuickActionsAdvanced from '@/components/QuickActionsAdvanced';
-import AnimatedCounter from '@/components/AnimatedCounter';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
 
 const Index = () => {
   const { user } = useAuth();
