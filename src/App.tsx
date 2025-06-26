@@ -9,6 +9,10 @@ import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
 import Accounts from '@/pages/Accounts';
 import Goals from '@/pages/Goals';
+import Investments from '@/pages/Investments';
+import Transactions from '@/pages/Transactions';
+import Reports from '@/pages/Reports';
+import MonthlyHistory from '@/pages/MonthlyHistory';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
@@ -29,6 +33,10 @@ function App() {
                       <Route path="/perfil" element={<Profile />} />
                       <Route path="/contas" element={<Accounts />} />
                       <Route path="/metas" element={<Goals />} />
+                      <Route path="/investimentos" element={<Investments />} />
+                      <Route path="/transacao" element={<Transactions />} />
+                      <Route path="/relatorios" element={<Reports />} />
+                      <Route path="/historico" element={<MonthlyHistory />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </main>
